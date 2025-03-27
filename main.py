@@ -8,7 +8,7 @@ def parse_args():
     """
     Parse command-line arguments.
     """
-    parser = argparse.ArgumentParser(description="Fetch historical bar data from Alpaca API.")
+    parser = argparse.ArgumentParser(description="Fetch historical stock bar data from Alpaca API.")
     
     # Command-line arguments
     parser.add_argument('--symbol', type=str, required=True, help="Ticker symbol (e.g., 'SPY')")
