@@ -1,0 +1,7 @@
+
+services:
+  pynars:
+    build: ./pyNARS/
+    container_name: pyNARS
+    ports: 
+      - "54321:54321"

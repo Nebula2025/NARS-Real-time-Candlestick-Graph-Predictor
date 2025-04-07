@@ -11,7 +11,10 @@ if os.path.exists(dotenv_path):
 else:
     print(f"Warning: .env file not found at {dotenv_path}")
 
+
 class Config:
     """Application configuration settings."""
+
     ALPACA_API_KEY = os.getenv("ALPACA_API_KEY", "you-will-never-guess")
     ALPACA_SECRET_KEY = os.getenv("ALPACA_SECRET_KEY", "")
+
