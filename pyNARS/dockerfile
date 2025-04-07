@@ -15,10 +15,6 @@ RUN apt-get update && \
         libsdl2-dev 
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
-RUN pip install poetry --upgrade
-
-RUN poetry install
-
 COPY . .
 
 RUN pip install -r requirements.txt
