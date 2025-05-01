@@ -4,6 +4,7 @@ import socket
 import sys
 from threading import Thread, Lock
 import math
+import plotly.graph_objects as go
 
 """
 The socket is used to establish communication between NARS and the game, and as expected, NARS will also use the exact 
@@ -122,8 +123,8 @@ import datetime
 
 def process_data():
 
-    start = datetime.datetime.strptime("2021-01-01", "%Y-%m-%d")
-    end = datetime.datetime.strptime("2021-01-30", "%Y-%m-%d")
+    start = datetime.datetime.strptime("2020-01-01", "%Y-%m-%d")
+    end = datetime.datetime.strptime("2025-01-01", "%Y-%m-%d")
 
     timeframe_map = {
         "minute": TimeFrame.Minute,
@@ -131,7 +132,7 @@ def process_data():
         "day": TimeFrame.Day,
     }
 
-    timeframe = timeframe_map["minute"]
+    timeframe = timeframe_map["day"]
     symbol = "SPY"
 
     fetcher = HistoricalDataFetcher(
@@ -152,10 +153,34 @@ def process_data():
     trade_count = [p.trade_count for p in data[symbol]]
     volume = [p.volume for p in data[symbol]]
 
-    while True:
+    nars_predicted_array = []
+
+    for i in range(1):
         for i, c in enumerate(close):
             # nars predict
             send_status(trade_count[i], volume[i], expected=c)
+            nars_predicted_array.append(nars_predicted)
+
+    print(nars_predicted_array)
+    fig = go.Figure()
+
+    x = list(range(len(close)))
+    # primary y-axis traces
+    fig.add_trace(go.Scatter(x=x, y=close, mode="lines+markers", name="Trade Close"))
+    fig.add_trace(
+        go.Scatter(
+            x=x, y=nars_predicted_array, mode="lines+markers", name="Nars Prediction"
+        )
+    )
+
+    fig.update_layout(
+        title="Trade Close and Nars Prediction Over Time",
+        xaxis_title=f"Index({timeframe}'s)",
+        yaxis=dict(title="Trade Close / Nars Prediction"),
+        legend=dict(x=0.01, y=0.99),
+    )
+
+    fig.show()
 
 
 def receive_commands():
