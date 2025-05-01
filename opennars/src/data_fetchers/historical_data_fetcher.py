@@ -6,6 +6,7 @@ from alpaca.data.historical import StockHistoricalDataClient
 from alpaca.data.timeframe import TimeFrame
 from alpaca.data.requests import StockBarsRequest
 
+
 class HistoricalDataFetcher:
     """
     A data fetching class for streaming live financial data.
@@ -28,7 +29,7 @@ class HistoricalDataFetcher:
         # Check if API key and secret key are provided
         if not api_key or not secret_key:
             raise ValueError("API key and secret key are required.")
-        
+
         # Checks if the provided symbol is valid
         trading_client = TradingClient(api_key, secret_key, paper=True)
         try:
@@ -37,11 +38,13 @@ class HistoricalDataFetcher:
                 raise ValueError(f"Invalid asset class for symbol: {symbol}")
         except Exception as e:
             raise ValueError(f"A valid symbol is required. Error: {e}")
-        
+
         self._symbol = symbol
         self._client = StockHistoricalDataClient(api_key, secret_key)
 
-    def retrieve_historical_bar_data(self, timeframe: TimeFrame, start: datetime.datetime, end: datetime.datetime) -> None:
+    def retrieve_historical_bar_data(
+        self, timeframe: TimeFrame, start: datetime.datetime, end: datetime.datetime
+    ):
         """
         Retrieves historical bar data for the given timeframe and date range,
         then saves the data to a CSV file if it doesn't already exist.
@@ -54,22 +57,14 @@ class HistoricalDataFetcher:
         Returns:
             None
         """
-        # Format the filename based on the symbol, timeframe, start, and end
-        filename = f"data/{self._symbol}-{timeframe.value}-{start.strftime('%Y-%m-%d-%H-%M-%S')}-{end.strftime('%Y-%m-%d-%H-%M-%S')}.csv"
-        
-        # Check if the file already exists
-        if not os.path.exists(filename):
-            # Request data from Alpaca
-            request_params = StockBarsRequest(
-                symbol_or_symbols=self._symbol,
-                timeframe=timeframe,
-                start=start,
-                end=end
-            )
-            bars = self._client.get_stock_bars(request_params)
-            
-            # Save the DataFrame to a CSV file
-            bars.df.to_csv(filename)
-            print(f"Data saved to {filename}")
-        else:
-            print(f"Data already exists in file:{filename}.")
+        # Request data from Alpaca
+        request_params = StockBarsRequest(
+            symbol_or_symbols=self._symbol,
+            timeframe=timeframe,
+            start=start,
+            end=end,
+        )
+        bars = self._client.get_stock_bars(request_params)
+        # Save the DataFrame to a CSV file
+        return bars
+

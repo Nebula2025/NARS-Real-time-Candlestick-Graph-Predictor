@@ -2,8 +2,10 @@
 # git+git://github.com/mila-iqia/atari-representation-learning.git
 # AutoROM>=0.4.2
 # AutoROM.accept-rom-license>=0.4.2
+alpaca-py==0.39.4
 bidict>=0.21.2
 depq>=1.5.5
+python-dotenv==1.1.0
 gym>=0.21.0
 jstyleson>=0.0.2
 lark==0.12.0
@@ -12,6 +14,7 @@ networkx>=2.6.3
 numpy>=1.21.5
 ordered-set>=4.0.2
 pygame>=2.1.2
+plotly==6.0.1
 sty>=1.0.0rc2
 tqdm<=3.1.4
 typing>=3.7.4.3
