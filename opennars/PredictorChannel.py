@@ -5,13 +5,8 @@ from pynars.NARS import Reasoner
 from pynars.NARS.DataStructures.MC.SensorimotorChannel import SensorimotorChannel
 from pynars.Narsese import parser
 
-"""
-The sensorimotor channel for the Pong game.
-It is placed here because I believe that every channel needs to be designed by the user.
-"""
-
 nars_address = ("127.0.0.1", 54321)
-game_address = ("127.0.0.1", 12345)
+predict_address = ("127.0.0.1", 12345)
 
 
 class PredictorChannel(SensorimotorChannel):
@@ -37,29 +32,28 @@ class PredictorChannel(SensorimotorChannel):
             num_reactions,
             N,
         )
+
         """
-        Babbling is designed to be very simple. If the current channel cannot generate an operation based on the 
-        reaction, then there is a certain probability that an operation will be generated through babbling. It is worth 
-        noting that currently a channel can only execute one operation in a cycle. Of course, in the future, this 
-        restriction can be lifted after the mutually exclusive relationship between operations is specified.
+        Babbling is a lightweight fallback mechanism: if the current channel can’t derive an operation from a reaction, 
+        there’s a small chance that babbling will step in and generate one instead. Note that, for now, each channel 
+        may perform only one operation per cycle—this restriction can be relaxed in future releases once we define 
+        mutual exclusivity rules between operations.
         
-        Babbling can be performed a limited number of times and cannot be replenished.
+        Babbling is consumable: it can only be used a limited number of times and does not replenish.
         """
-        self.num_babbling = 200
-        self.babbling_chance = 0.5
+
+        self.num_babbling = 1000
+        self.babbling_chance = 1
 
     def information_gathering(self):
-        """
-        Receive a string from the game and parse it into a task.
-        """
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.bind(nars_address)
         data, _ = sock.recvfrom(1024)
         status = data.decode()
-        if status != "GAME FAILED":
+        if status != "CONNECTION FAILED":
             try:
                 return [parser.parse(each) for each in status.split("|")]
-            except:  # for unexpected game input error
+            except:
                 print(status)
                 exit()
         else:
@@ -79,29 +73,26 @@ def execute_Mup():
     All channels need to register for its own operations. It is recommended to list them in the channel created.
     """
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.sendto("^up".encode(), game_address)
+    sock.sendto("^up".encode(), predict_address)
 
 
 def execute_Mdown():
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.sendto("^down".encode(), game_address)
+    sock.sendto("^down".encode(), predict_address)
 
 
 def execute_Hold():
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.sendto("^hold".encode(), game_address)
+    sock.sendto("^hold".encode(), predict_address)
 
 
 if __name__ == "__main__":
-    """
-    Open the game first and run this script to see all predictions generated.
-    "+1, +2" will not be in the Narsese.
-    """
     r = Reasoner(100, 100)
-    pc = PredictorChannel("Predictor", 2, 5, 50, 5, 50, 50, 1)
+    pc = PredictorChannel("Predictor", 2, 5, 20, 5, 50, 50, 1)
     pc.register_operation("^up", execute_Mup, ["^up", "up"])
     pc.register_operation("^down", execute_Mdown, ["^down", "down"])
     pc.register_operation("^hold", execute_Hold, ["^hold", "hold"])
-    for _ in range(1000):
+
+    while True:
         pc.channel_cycle(r.memory)
         pc.input_buffer.predictive_implications.show(lambda x: x.task.sentence)

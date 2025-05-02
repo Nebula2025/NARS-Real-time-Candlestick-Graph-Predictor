@@ -5,15 +5,30 @@ from pynars.Narsese import parser
 
 class SensorimotorChannel:
 
-    def __init__(self, ID, num_slot, num_events, num_anticipations, num_operations, num_predictive_implications,
-                 num_reactions, N=1):
+    def __init__(
+        self,
+        ID,
+        num_slot,
+        num_events,
+        num_anticipations,
+        num_operations,
+        num_predictive_implications,
+        num_reactions,
+        N=1,
+    ):
         self.ID = ID
         """
         The name "input buffer" might be a bit misleading, since there are no corresponding "output buffer" in a
         channel, but this is the name in the conceptual design.
         """
-        self.input_buffer = EventBuffer(num_slot, num_events, num_anticipations, num_operations,
-                                        num_predictive_implications, N)
+        self.input_buffer = EventBuffer(
+            num_slot,
+            num_events,
+            num_anticipations,
+            num_operations,
+            num_predictive_implications,
+            N,
+        )
         self.reactions = PriorityQueue(num_reactions)
         self.num_reactions = num_reactions
         self.operations = {}
@@ -133,6 +148,7 @@ class SensorimotorChannel:
         reactions, ret = self.input_buffer.buffer_cycle(inputs, memory)
         for each in reactions:
             self.reactions.push(each, self.reaction_evaluation(each, memory))
+
         return ret
         # ==============================================================================================================
         # original
