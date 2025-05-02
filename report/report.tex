@@ -97,13 +97,59 @@ if reaction.goal is None:
 
 \end{lstlisting}
 
-\section{Results}
-Dispite the issues we still wrote most of the code required to complete our Objective. Our
+\section{Method and Results}
+Despite the issues we still wrote most of the code required to complete our Objective.
 
-how we choose truth values, what we sent to NARS
+\subsection*{Sentence Building}
+In order to communicate with NARS we constructed sentences relating to the price of closing
+for that iteration. when NARS's prediction was within a buffer value. To begin with we
+created the relation for when NARS was in the buffers range:
 
+\begin{lstlisting}
+msg = "<{SELF} --> [good]>. %1;0.9%"
+\end{lstlisting}
+
+If NARS fell below the true close then we computed the following:
+\begin{lstlisting}
+msg_1 = "<{up} --> [on]>. %1;0.9%"
+
+f = str(percent_correct(cur_predicted, expected))
+
+msg_2 = "<{SELF} --> [good]>. %" + f + ";0.9%"
+\end{lstlisting}
+
+If NARS was above the true close then we computed the following:
+\begin{lstlisting}
+msg_1 = "<{down} --> [on]>. %1;0.9%"
+
+f = str(percent_correct(cur_predicted, expected))
+
+msg_2 = "<{SELF} --> [good]>. %" + f + ";0.9%"
+\end{lstlisting}
+
+To calculate an f value that was meaningful for NARS we decided to use a formula for
+percent correctness bounded between 0 and 1. If the observed value was far away from
+the true value then the function would return a low f value. If the observed was
+close to the true value then f would be closer to 1, telling NARS that it was "close"
+to what the truth was.
+\begin{lstlisting}[style=Pseudocode, mathescape=true]
+def percent_correct(true, observed):
+    if true == 0:
+        return 1.0 if observed == 0 else 0.0
+    error = abs(observed - true) / abs(true)
+    return max(0.0, 1 - error)
+\end{lstlisting}
+
+Our ideal scenario would include obtaining at least one sensorimotor command everytime we
+sent a sentence to NARS, more if its prediction was way off. Doing so would have allowed us
+to only have to increment the predicted value of NARS by one per command.
+
+\vspace{3mm}
+Here is a graph depicting our failure, the only movement is from babbling with an augmentation
+of NARS's predicted value set to 100
 \begin{center}
 	\includegraphics[width=\textwidth]{screenshot.png}
 \end{center}
 
+All our candlestick data was obtained via Alpaca API.
 \end{document}
