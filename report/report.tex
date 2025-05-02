@@ -1,0 +1,109 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{pgfplots}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{amssymb}
+\usepackage{verbatim}
+\usepackage{fancyvrb}
+\usepackage{listings}
+\usepackage{mathtools}
+\usepackage{qtree}
+\usepackage{graphicx}
+
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+\setlength\parindent{0pt}
+
+\pgfplotsset{compat=1.11, width=12cm, height=9cm}
+
+\usepackage{xcolor}
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{.5,.5,.5}
+\definecolor{codepurple}{rgb}{.58,0,.82}
+\definecolor{backcolor}{rgb}{1,1,1}
+
+\lstdefinestyle{Pseudocode} {
+    backgroundcolor=\color{backcolor},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=false,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2
+}
+
+\graphicspath{ {./images/} }
+
+\title{Final Report}
+\author{Ishmam Kabir and Troy Witmer}
+\date{2025-05-01}
+
+\begin{document}
+\maketitle
+
+\section{Objective}
+Our inital Objective was to use openars to predict future data points on a candlestick graph based
+on historical data.
+This uses open, high low, and close data points on each candlestick to predict the next few.
+This project uses stock data because of its historical availability, accuracy.
+However due to unforeseen circumstances we could not implement all candlestick
+data such as high, low, and open, instead we settled for close and changed from a
+candlestick graph to a line graph. Due to errors in the python version of OpenNARS our
+program was cut short and was not able to be fully implemented.
+
+\section{Problems}
+
+During our development we ran into two big problems, first was the prediction rate vs
+the rate we were sending data to NARS, second was the babbling feature was the only
+data we were receiving due to issues in the source code. These problems appeared to
+be seperate at first with our minds focusing on figuring out how we could get NARS to
+execute a sensorimotor command everytime we sent a sentence to it. After hours of
+failing to come up with a solution we stumbled across the source code for the SensorimotorChannel
+which contained bypasses, which according to the comments stated an issue with the Reasoner.
+After much time debugging, we were unable to find a fix for the issue. As a result of
+the Reasoner being broken all commands sent from the SensorimotorChannel were random due
+to the babbling feature.
+
+\vspace{3mm}
+Here is snippits found inside the source code of OpenNARS Python.
+
+\begin{lstlisting}[style=Pseudocode, mathescape=true]
+// cheating
+// since something is wrong the reasoner, such that it cannot generate sub-goals correctly, I have to cheat.
+
+reactions, ret = self.input_buffer.buffer_cycle(inputs, memory)
+for each in reactions:
+  self.reactions.push(each, self.reaction_evaluation(each, memory))
+
+return ret
+// original
+// return self.input_buffer.buffer_cycle(inputs, memory)
+
+
+// cheating
+// since something is wrong the reasoner, such that it cannot generate sub-goals correctly, I have to cheat.
+// this means there are reactions with no corresponding goals
+if reaction.goal is None:
+    return 0.7
+
+\end{lstlisting}
+
+\section{Results}
+Dispite the issues we still wrote most of the code required to complete our Objective. Our
+
+how we choose truth values, what we sent to NARS
+
+\begin{center}
+	\includegraphics[width=\textwidth]{screenshot.png}
+\end{center}
+
+\end{document}
